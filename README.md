@@ -155,6 +155,20 @@ python openrouter_sdk_examples.py async
 `compare-models` and `async` each issue several requests; the rest are one call
 apiece. An unknown name prints the list above rather than running anything.
 
+## reasoning-explorer/
+
+A separate Go sub-project (stdlib only, no SDKs) that dissects reasoning models
+through the raw OpenRouter HTTP API: the unified `reasoning` request parameter,
+the `reasoning`/`reasoning_details` response fields, token accounting
+(reasoning bills as output), hand-parsed SSE streaming, a cross-provider
+comparison (DeepSeek/Anthropic/OpenAI/Gemini/Qwen), and multi-turn tool calling
+with preserved thinking blocks. Every request and raw response is logged to
+`reasoning-explorer/logs/`. See its own README:
+
+```bash
+cd reasoning-explorer && go run . phase1   # phases 1–6
+```
+
 ## Configuration
 
 Shared constants live in `common.py` and apply to every script:
