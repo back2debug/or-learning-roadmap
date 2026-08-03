@@ -81,3 +81,5 @@ generated_video*
 logs/
 tmp/
 scratch/
+
+replay.go
