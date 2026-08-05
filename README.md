@@ -1,13 +1,12 @@
-# OpenRouter Scripts
+# or Learning Scripts
 
-Learning scripts for the [OpenRouter](https://openrouter.ai) Python SDK — a set of
-annotated examples covering chat completions, streaming, multi-turn conversations,
-parameter tuning, model comparison, and async requests.
+A set of annotated Python examples covering chat completions, streaming,
+multi-turn conversations, parameter tuning, model comparison, and async requests.
 
 ## Requirements
 
 - Python 3.8+
-- An OpenRouter API key ([openrouter.ai/keys](https://openrouter.ai/keys))
+- An or API key
 
 ## Setup
 
@@ -17,32 +16,26 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Provide your API key via the environment — it is never read from a file or
-hardcoded:
+Set your API key via the `OPENROUTER_API_KEY` environment variable:
 
 ```bash
 export OPENROUTER_API_KEY='sk-or-...'
 ```
 
-Prefer a `.env` file for local work (it is gitignored):
+For local work, use a `.env` file (gitignored):
 
 ```bash
 echo "OPENROUTER_API_KEY=sk-or-..." > .env
+python -m dotenv -r
 ```
 
-...and load it with [`python-dotenv`](https://pypi.org/project/python-dotenv/),
-which is listed as an optional dev dependency in `requirements.txt`.
-
-Every script stops with a warning if `OPENROUTER_API_KEY` is unset;
-`openrouter_sdk_examples.py` additionally warns when the key doesn't look like
-an OpenRouter key.
+Every script requires this key and warns if it's unset.
 
 ### Browsing the model catalog
 
-`model_calls.py` pages through OpenRouter's 400+ models across six
-modalities and can call one of each. Model discovery and categorization live in
-`models_catalog.py`, and the shared guards in `common.py`; `model_calls.py`
-imports both:
+`model_calls.py` pages through 400+ models across six modalities and can call
+one of each. Model discovery and categorization live in `models_catalog.py`,
+and the shared guards in `common.py`; `model_calls.py` imports both:
 
 | Modality | Purpose | Output |
 | --- | --- | --- |
@@ -115,11 +108,10 @@ python model_calls.py call-video google/veo-3.1 "A cat playing with a ball" --no
 python model_calls.py poll-video <job_id>
 ```
 
-**speech vs. audio:** `speech` is the text-to-speech modality, served by the
-`/audio/speech` endpoint that `call-speech` uses. OpenRouter also has a separate
-`audio` modality — chat models such as `openai/gpt-audio` that return audio
-inline with their text reply through the chat endpoint. Those are not speech
-models and won't work with `call-speech`, so `audio` is list-only here:
+**speech vs. audio:** `speech` is the text-to-speech modality served by the
+`/audio/speech` endpoint. A separate `audio` modality covers chat models such
+as `openai/gpt-audio` that return audio inline through the chat endpoint. Those
+don't work with `call-speech`, so `audio` is list-only:
 
 ```bash
 python model_calls.py list-audio                  # no call-audio counterpart
@@ -234,4 +226,3 @@ Honest gaps, not oversights:
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
-- [OpenRouter Documentation](https://openrouter.ai/docs)

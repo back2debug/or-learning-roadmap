@@ -1,8 +1,7 @@
 # reasoning-explorer
 
 A Go learning project that dissects how **reasoning models** work through the
-[OpenRouter](https://openrouter.ai) chat completions API. It is deliberately
-not a polished tool: everything is optimized for **inspectability** — raw HTTP
+chat completions API. Everything is optimized for **inspectability** — raw HTTP
 with the standard library only (`net/http`, `encoding/json`, `bufio`), no SDKs,
 and every request/response logged verbatim before it is sent/parsed.
 
@@ -32,11 +31,10 @@ so the only variable is the model/config.
 
 ### Phase 1 — Baseline anatomy (non-reasoning model)
 `openai/gpt-4o-mini`, plain request. Unmarshals into structs **and** a
-`map[string]any` to expose fields the structs miss. OpenRouter additions over
-vanilla OpenAI: `gen-...` id (queryable at `/api/v1/generation`), `provider`,
-`native_finish_reason`, `usage.cost` (with `"usage": {"include": true}`),
-`cost_details`. Note `message.reasoning: null` exists even here — the slot is
-always present.
+`map[string]any` to expose fields the structs miss. Additions over vanilla OpenAI:
+`gen-...` id (queryable at `/api/v1/generation`), `provider`, `native_finish_reason`,
+`usage.cost` (with `"usage": {"include": true}`), and `cost_details`. Note
+`message.reasoning: null` exists even here — the slot is always present.
 
 ### Phase 2 — Same prompt, reasoning model
 `deepseek/deepseek-r1-0528`. Reasoning appears in **two mirrored places**:
