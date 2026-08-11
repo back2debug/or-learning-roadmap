@@ -81,5 +81,8 @@ generated_video*
 logs/
 tmp/
 scratch/
+*.csv
+*.json
+learning_log.txt
 
 replay.go
