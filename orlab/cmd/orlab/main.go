@@ -62,8 +62,7 @@ func run() error {
 	}
 	defer rec.Close()
 
-	// runDir derives from -out, an operator-supplied output directory.
-	logFile, err := os.OpenFile(filepath.Join(runDir, "log.jsonl"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	logFile, err := os.OpenFile(filepath.Join(runDir, "log.jsonl"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600) // #nosec G304 G703 -- operator-supplied output path
 	if err != nil {
 		return err
 	}
@@ -73,7 +72,7 @@ func run() error {
 		slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}),
 	})
 
-	transcript, err := os.OpenFile(filepath.Join(runDir, "transcript.txt"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	transcript, err := os.OpenFile(filepath.Join(runDir, "transcript.txt"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600) // #nosec G304 G703 -- operator-supplied output path
 	if err != nil {
 		return err
 	}
