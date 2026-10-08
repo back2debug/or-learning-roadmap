@@ -105,3 +105,7 @@ orlab/reports/
 /reasoning-explorer/reasoning-explorer
 /tool-calling/tool-calling
 /orlab/orlab
+/jev-learning/jev_decisions
+/jev-learning/jev-learning
+# Anything else: build into bin/ (go build -o bin/) so it is ignored by default.
+bin/
