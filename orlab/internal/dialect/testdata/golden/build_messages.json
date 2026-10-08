@@ -1,0 +1,104 @@
+{
+  "body": {
+    "model": "x-ai/grok-4.6",
+    "system": "You are terse.",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "What's the weather in Oslo?"
+          }
+        ]
+      },
+      {
+        "role": "assistant",
+        "content": [
+          {
+            "type": "tool_use",
+            "id": "call_1",
+            "name": "get_weather",
+            "input": {
+              "city": "Oslo"
+            }
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "tool_result",
+            "tool_use_id": "call_1",
+            "content": "{\"temp_c\":7}"
+          }
+        ]
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "Summarize."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "Current weather for a city",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "auto"
+    },
+    "max_tokens": 128,
+    "temperature": 0,
+    "top_p": 0.9,
+    "top_k": 40,
+    "stop_sequences": [
+      "END"
+    ],
+    "thinking": {
+      "type": "enabled",
+      "budget_tokens": 2048
+    },
+    "stream": true,
+    "session_id": "orlab-golden-session",
+    "metadata": {
+      "run": "golden"
+    },
+    "debug": {
+      "echo_upstream_body": true
+    }
+  },
+  "notes": {
+    "Renamed": {
+      "MaxTokens": "max_tokens",
+      "StopSequences": "stop_sequences",
+      "System": "top-level system",
+      "Tools[].Parameters": "tools[].input_schema"
+    },
+    "Transformed": {
+      "EchoUpstream": "debug sent although docs say unsupported on /messages (probe)",
+      "ReasoningEffort": "\"low\" becomes thinking budget_tokens=2048 (harness convention)"
+    },
+    "Unexpressible": {
+      "Seed": "the Messages schema has no seed field"
+    }
+  },
+  "path": "/messages"
+}

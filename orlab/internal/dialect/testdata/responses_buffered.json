@@ -1,0 +1,15 @@
+{
+  "id": "resp_02",
+  "status": "incomplete",
+  "provider": "OpenAI",
+  "incomplete_details": {"reason": "max_output_tokens"},
+  "output": [
+    {"type": "reasoning", "summary": [{"type": "summary_text", "text": "thought"}]},
+    {"type": "message", "content": [{"type": "output_text", "text": "Partial"}]}
+  ],
+  "usage": {
+    "input_tokens": 5,
+    "output_tokens": 64,
+    "output_tokens_details": {"reasoning_tokens": 32}
+  }
+}

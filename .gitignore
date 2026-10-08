@@ -86,3 +86,15 @@ scratch/
 learning_log.txt
 
 replay.go
+
+# --- orlab (Go harness) ------------------------------------------------------
+# Run artifacts hold full request/response bodies. Never commit a live run;
+# the committed cassette under orlab/testdata is synthetic and regenerable.
+orlab/runs/
+orlab/reports/
+*.jsonl
+
+# The Python rules above ignore *.json and *.jsonl repo-wide. orlab's embedded
+# suite, golden files, and fixtures are JSON source, so re-include them.
+!orlab/internal/prompts/suite.json
+!orlab/**/testdata/**

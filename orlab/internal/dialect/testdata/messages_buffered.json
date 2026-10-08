@@ -1,0 +1,10 @@
+{
+  "id": "msg_03",
+  "model": "x-ai/grok-4.6",
+  "content": [
+    {"type": "thinking", "thinking": "considering"},
+    {"type": "text", "text": "Hi there"}
+  ],
+  "stop_reason": "max_tokens",
+  "usage": {"input_tokens": 8, "output_tokens": 64, "cache_read_input_tokens": 2}
+}

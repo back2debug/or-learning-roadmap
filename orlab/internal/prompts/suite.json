@@ -1,0 +1,182 @@
+[
+  {
+    "ID": "plain",
+    "Kind": "plain",
+    "Turns": [{"Role": "user", "Text": "Reply with exactly: hello from orlab"}],
+    "MaxTokens": 64,
+    "Temperature": 0
+  },
+  {
+    "ID": "system",
+    "Kind": "system",
+    "System": "You are a terse assistant. Answer in five words or fewer.",
+    "Turns": [{"Role": "user", "Text": "What color is a clear daytime sky?"}],
+    "MaxTokens": 64,
+    "Temperature": 0
+  },
+  {
+    "ID": "multiturn",
+    "Kind": "multiturn",
+    "Turns": [
+      {"Role": "user", "Text": "My favorite number is 17. Remember it."},
+      {"Role": "assistant", "Text": "Noted: your favorite number is 17."},
+      {"Role": "user", "Text": "What is my favorite number plus 3?"}
+    ],
+    "MaxTokens": 64,
+    "Temperature": 0
+  },
+  {
+    "ID": "prefill",
+    "Kind": "prefill",
+    "Turns": [
+      {"Role": "user", "Text": "Name the capital of France in one word."},
+      {"Role": "assistant", "Text": "The capital is"}
+    ],
+    "MaxTokens": 32,
+    "Temperature": 0
+  },
+  {
+    "ID": "json_schema",
+    "Kind": "json_schema",
+    "Turns": [{"Role": "user", "Text": "Describe the planet Mars as JSON."}],
+    "JSONSchema": {
+      "Name": "planet",
+      "Strict": true,
+      "Schema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "moons": {"type": "integer"}
+        },
+        "required": ["name", "moons"],
+        "additionalProperties": false
+      }
+    },
+    "MaxTokens": 128,
+    "Temperature": 0
+  },
+  {
+    "ID": "tools",
+    "Kind": "tools",
+    "Turns": [
+      {"Role": "user", "Text": "What's the weather in Oslo? Use the tool."},
+      {"Role": "assistant", "ToolCalls": [{"ID": "call_orlab_1", "Name": "get_weather", "Arguments": {"city": "Oslo"}}]},
+      {"Role": "user", "ToolCallID": "call_orlab_1", "Text": "{\"temp_c\": 7, \"conditions\": \"cloudy\"}"},
+      {"Role": "user", "Text": "Summarize the weather in one sentence."}
+    ],
+    "Tools": [
+      {
+        "Name": "get_weather",
+        "Description": "Get current weather for a city",
+        "Parameters": {
+          "type": "object",
+          "properties": {"city": {"type": "string"}},
+          "required": ["city"]
+        }
+      }
+    ],
+    "ToolChoice": {"Mode": "auto"},
+    "MaxTokens": 128,
+    "Temperature": 0
+  },
+  {
+    "ID": "reasoning",
+    "Kind": "reasoning",
+    "Turns": [{"Role": "user", "Text": "A bat and a ball cost $1.10 total. The bat costs $1.00 more than the ball. How much is the ball?"}],
+    "ReasoningEffort": "low",
+    "MaxTokens": 512,
+    "Temperature": 0
+  },
+  {
+    "ID": "stop_seq",
+    "Kind": "stop_seq",
+    "Turns": [{"Role": "user", "Text": "Count upward from one, in words, one per line: one, two, three, and so on up to ten."}],
+    "StopSequences": ["five"],
+    "MaxTokens": 128,
+    "Temperature": 0
+  },
+  {
+    "ID": "param_fate",
+    "Kind": "param_fate",
+    "Turns": [{"Role": "user", "Text": "Say a single random word."}],
+    "MaxTokens": 32,
+    "Temperature": 1.97,
+    "TopK": 40,
+    "Seed": 999331
+  },
+  {
+    "ID": "param_fate_strict",
+    "Kind": "param_fate",
+    "Turns": [{"Role": "user", "Text": "Say a single random word."}],
+    "MaxTokens": 32,
+    "Temperature": 1.97,
+    "TopK": 40,
+    "Seed": 999331,
+    "RequireParameters": true
+  },
+  {
+    "ID": "unicode",
+    "Kind": "unicode",
+    "Turns": [{"Role": "user", "Text": "Repeat this line exactly: 🦊🇳🇴 日本語のテキスト العربية עברית élève Z̷̙̈a̶͚̽l̸̠̈g̶̢̛o̷̙͝"}],
+    "MaxTokens": 128,
+    "Temperature": 0
+  },
+  {
+    "ID": "long_ctx",
+    "Kind": "long_ctx",
+    "Turns": [{"Role": "user", "Text": "Here is a passage:\n{{FILLER:300}}\nHow many times does the word 'fox' appear? Answer with just a number."}],
+    "MaxTokens": 32,
+    "Temperature": 0
+  },
+  {
+    "ID": "buffered",
+    "Kind": "buffered",
+    "Turns": [{"Role": "user", "Text": "Reply with exactly: hello from orlab"}],
+    "MaxTokens": 64,
+    "Temperature": 0
+  },
+  {
+    "ID": "extras_parity",
+    "Kind": "extras_parity",
+    "Turns": [{"Role": "user", "Text": "Reply with exactly: extras probe"}],
+    "MaxTokens": 64,
+    "Temperature": 0,
+    "SessionID": "op-{{PAD:197}}",
+    "OutputConfig": {"effort": "low"},
+    "Metadata": {"orlab_probe": "extras_parity"}
+  },
+  {
+    "ID": "err_bad_model",
+    "Kind": "error_probe",
+    "Model": "orlab/does-not-exist",
+    "Turns": [{"Role": "user", "Text": "hello"}],
+    "MaxTokens": 32
+  },
+  {
+    "ID": "err_missing_max_tokens",
+    "Kind": "error_probe",
+    "Turns": [{"Role": "user", "Text": "Reply with exactly: no cap"}],
+    "MaxTokens": 0,
+    "Temperature": 0
+  },
+  {
+    "ID": "err_bad_tool_schema",
+    "Kind": "error_probe",
+    "Turns": [{"Role": "user", "Text": "Use the tool."}],
+    "Tools": [
+      {
+        "Name": "broken_tool",
+        "Description": "A tool with a malformed schema",
+        "Parameters": {"type": "banana", "properties": 42}
+      }
+    ],
+    "MaxTokens": 32
+  },
+  {
+    "ID": "err_session_overflow",
+    "Kind": "error_probe",
+    "Turns": [{"Role": "user", "Text": "hello"}],
+    "MaxTokens": 32,
+    "SessionID": "ov-{{PAD:297}}"
+  }
+]

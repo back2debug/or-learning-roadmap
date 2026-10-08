@@ -1,0 +1,91 @@
+{
+  "body": {
+    "model": "x-ai/grok-4.6",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are terse."
+      },
+      {
+        "role": "user",
+        "content": "What's the weather in Oslo?"
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "tool_calls": [
+          {
+            "id": "call_1",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"city\":\"Oslo\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "content": "{\"temp_c\":7}",
+        "tool_call_id": "call_1"
+      },
+      {
+        "role": "user",
+        "content": "Summarize."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Current weather for a city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto",
+    "max_completion_tokens": 128,
+    "temperature": 0,
+    "top_p": 0.9,
+    "top_k": 40,
+    "stop": [
+      "END"
+    ],
+    "seed": 1234,
+    "reasoning": {
+      "effort": "low"
+    },
+    "stream": true,
+    "session_id": "orlab-golden-session",
+    "metadata": {
+      "run": "golden"
+    },
+    "debug": {
+      "echo_upstream_body": true
+    }
+  },
+  "notes": {
+    "Renamed": {
+      "MaxTokens": "max_completion_tokens",
+      "ReasoningEffort": "reasoning.effort",
+      "StopSequences": "stop",
+      "System": "messages[0] with role \"system\""
+    },
+    "Transformed": {
+      "Tools": "wrapped as tools[].function"
+    },
+    "Unexpressible": {}
+  },
+  "path": "/chat/completions"
+}

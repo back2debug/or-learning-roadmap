@@ -1,0 +1,45 @@
+name: orlab CI
+
+on:
+  push:
+    paths: ["orlab/**", ".github/workflows/orlab-ci.yml"]
+  pull_request:
+    paths: ["orlab/**", ".github/workflows/orlab-ci.yml"]
+
+defaults:
+  run:
+    working-directory: orlab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: orlab/go.mod
+          cache-dependency-path: orlab/go.mod
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Forbid InsecureSkipVerify
+        run: make insecure-grep
+
+      - name: Test (race)
+        run: go test -race ./...
+
+      - name: staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest ./...
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -quiet ./...
+
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"

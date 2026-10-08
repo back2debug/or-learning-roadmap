@@ -1,0 +1,92 @@
+{
+  "body": {
+    "model": "x-ai/grok-4.6",
+    "instructions": "You are terse.",
+    "input": [
+      {
+        "type": "message",
+        "role": "user",
+        "content": [
+          {
+            "type": "input_text",
+            "text": "What's the weather in Oslo?"
+          }
+        ]
+      },
+      {
+        "type": "function_call",
+        "call_id": "call_1",
+        "name": "get_weather",
+        "arguments": "{\"city\":\"Oslo\"}"
+      },
+      {
+        "type": "function_call_output",
+        "call_id": "call_1",
+        "output": "{\"temp_c\":7}"
+      },
+      {
+        "type": "message",
+        "role": "user",
+        "content": [
+          {
+            "type": "input_text",
+            "text": "Summarize."
+          }
+        ]
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Current weather for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    ],
+    "tool_choice": "auto",
+    "max_output_tokens": 128,
+    "temperature": 0,
+    "top_p": 0.9,
+    "top_k": 40,
+    "seed": 1234,
+    "stop": [
+      "END"
+    ],
+    "reasoning": {
+      "effort": "low"
+    },
+    "stream": true,
+    "session_id": "orlab-golden-session",
+    "metadata": {
+      "run": "golden"
+    },
+    "debug": {
+      "echo_upstream_body": true
+    }
+  },
+  "notes": {
+    "Renamed": {
+      "MaxTokens": "max_output_tokens",
+      "ReasoningEffort": "reasoning.effort",
+      "System": "instructions"
+    },
+    "Transformed": {
+      "Seed": "seed is not part of OpenAI's Responses schema; sent anyway (probe)",
+      "StopSequences": "stop is not part of OpenAI's Responses schema; sent anyway (probe)",
+      "Tools": "flattened: name/parameters sit directly on the tool object, no function wrapper",
+      "TopK": "top_k is not part of OpenAI's Responses schema; sent as an OpenRouter extension (probe)"
+    },
+    "Unexpressible": {}
+  },
+  "path": "/responses"
+}

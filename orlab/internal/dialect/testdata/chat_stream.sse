@@ -1,0 +1,11 @@
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-chat-001","choices":[],"debug":{"echo_upstream_body":{"model":"grok-4.6","messages":[{"role":"user","content":"hi"}],"max_tokens":64}}}
+
+data: {"id":"gen-chat-001","provider":"xAI","choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"gen-chat-001","provider":"xAI","choices":[{"delta":{"content":" world"},"finish_reason":null}]}
+
+data: {"id":"gen-chat-001","provider":"xAI","choices":[{"delta":{},"finish_reason":"stop","native_finish_reason":"completed"}],"usage":{"prompt_tokens":10,"completion_tokens":2,"cost":0.00004,"prompt_tokens_details":{"cached_tokens":3},"completion_tokens_details":{"reasoning_tokens":0}},"openrouter_metadata":{"requested":"x-ai/grok-4.6","strategy":"direct","attempt":1}}
+
+data: [DONE]
