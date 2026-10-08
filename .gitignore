@@ -98,3 +98,10 @@ orlab/reports/
 # suite, golden files, and fixtures are JSON source, so re-include them.
 !orlab/internal/prompts/suite.json
 !orlab/**/testdata/**
+
+# --- Go build outputs --------------------------------------------------------
+# Unstripped binaries embed local build paths. Rebuild with `go build` instead.
+/pareto-lab/pareto-lab
+/reasoning-explorer/reasoning-explorer
+/tool-calling/tool-calling
+/orlab/orlab
