@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: orlab/go.mod
+          check-latest: true
           cache-dependency-path: orlab/go.mod
 
       - name: Build
