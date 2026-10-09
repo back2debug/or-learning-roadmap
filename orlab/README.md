@@ -34,13 +34,10 @@ Useful flags: `-models` (comma-separated slugs), `-suite` (path to your own suit
 
 ## Architecture
 
-Everything hangs off one canonical type. A `PromptSpec` is a dialect-independent description of what you want to ask: system text, conversation turns, tool definitions, a JSON schema, sampling parameters, a reasoning effort level. Each of the three `Dialect` implementations translates that spec into its own wire format and, alongside the request body, returns `BuildNotes` recording exactly what translation did — which canonical fields it renamed, which it transformed non-trivially, and which it has no wire form for at all. Nothing is dropped silently at the build boundary; if a dialect cannot express something, it says so.
-
-Responses travel the same path in reverse. Each dialect parses its own response into a shared `Result`: text, reasoning text, tool calls, a normalized stop reason alongside the raw one the dialect reported, usage, the echoed upstream body, router metadata, and timings. Fields a dialect cannot populate are recorded in an explicit `Unsupported` map rather than left as zeroes, because a silent zero and a real zero are indistinguishable once they reach a comparison table.
-
-Streaming is the primary path, not an add-on. The `debug.echo_upstream_body` flag — the feature this whole tool is built around — only works on streamed requests, so every suite entry runs streamed by default and `ParseStream` is the code path that matters. `ParseResponse` exists for the buffered comparison mode, and the difference between streamed and buffered results for identical input is itself something the report measures.
-
-Around that core: a transport with TLS 1.2 as the floor, redirects pinned to the API host, full-jitter backoff that honors `Retry-After`, and response reads that fail loudly at a cap instead of truncating; a redactor that scrubs credentials before anything reaches disk; a runner that emits a labeled event for every phase; and an analyzer that turns the accumulated outcomes into the reports.
+- **One canonical request.** A `PromptSpec` describes the prompt independently of any dialect. Each of the three `Dialect` implementations translates it to its own wire format and returns `BuildNotes` recording what it renamed, transformed, or could not express.
+- **One shared result.** Each dialect parses its response into a `Result`. Fields a dialect cannot populate go in an explicit `Unsupported` map, so a missing value is never mistaken for a real zero.
+- **Streaming first.** `debug.echo_upstream_body` only works on streamed requests, so every suite entry runs streamed by default. Buffered mode exists for comparison.
+- **Supporting pieces.** A hardened transport (TLS 1.2 floor, pinned redirects, backoff that honors `Retry-After`), a redactor that scrubs credentials before anything reaches disk, a runner that emits an event per phase, and an analyzer that builds the reports.
 
 ## The nine phases
 
@@ -100,7 +97,7 @@ Around that core: a transport with TLS 1.2 as the floor, redirects pinned to the
 
 ## Sample output
 
-These samples come from the committed replay cassette, which is **synthetic** — recorded against the in-repo fake OpenRouter server, not from a live run. They show the shape of the output, not real findings about OpenRouter. See [Findings](#findings) for what has and has not been measured against the live API.
+These samples come from the committed replay cassette, which is **synthetic** — recorded against the in-repo fake OpenRouter server, not from a live run. They show the shape of the output, not real findings about OpenRouter. What has been measured against the live API is recorded in [docs/findings.md](docs/findings.md).
 
 Capability matrix (excerpt):
 
@@ -149,24 +146,9 @@ Run directories are created with mode 0700 and files with 0600, at creation time
 
 `runs/`, `reports/`, `*.jsonl`, and `.env` are ignored by the repo-root `.gitignore`, which also re-includes orlab's JSON fixtures and embedded suite (the root file ignores `*.json` repo-wide for the Python projects alongside this one). Before committing any sample output, confirm it came from a scrubbed or synthetic run.
 
-## Findings
-
-**Not yet measured against the live API.** Everything in this section is derived from OpenRouter's documentation as reconciled on 2026-08-27 (see `docs/API-NOTES.md`) plus the harness's own build-time behavior. The tool has been exercised end to end against a fake server and in dry-run mode, but no live run has been performed, so the empirical columns are open. Run it and this section should be replaced with what actually happened.
-
-What the docs now say, having drifted from what this project's brief assumed:
-
-- **`echo_upstream_body` is documented as unsupported on `/messages`**, and supported on `/chat/completions` and `/responses` only. It is streaming-only everywhere: "Only works with streaming mode." Delivery differs by dialect — chat sends it as the first chunk with an empty `choices` array, Responses as a typed `response.debug` SSE event. The harness still probes `/messages` anyway, because a cheap probe against a documented negative is exactly the kind of thing worth confirming.
-- **`max_tokens` is not required on `/messages`** through OpenRouter, contrary to Anthropic's own API. Only `model` and `messages` are required. The "missing max_tokens" error probe is therefore expected to succeed, and its success is the finding.
-- **`session_id` is capped at 256 characters on `/messages`**, not 128 — the documented asymmetry the brief expected to catch appears to be gone. The 200-character parity probe now expects uniform acceptance, and a rejection anywhere would be the finding.
-- **The canonical error taxonomy is larger than expected** and includes `max_tokens_exceeded`, `permission_denied`, `provider_unavailable`, and `invalid_prompt` among others; `timeout` maps to 504, not 408. On a 500 the message is genericized and `provider_code` and `openrouter_metadata` are stripped, but `error_type` survives. Whether `error_type` really is "stable across all API formats" is measured directly by the `error_probe` suite entries.
-- **Router metadata covers all three routes**, including `/messages`, which makes it the only uniform observability channel here. It arrives on the final chunk before `[DONE]` on chat and Responses, and inside the terminal `message_stop` event on Messages. Note that **cache hits never include it** — an absence that must not be misread as a routing bug.
-- **`/responses` is stateless** and rejects `store: true` or a non-null `previous_response_id` with a 400. Because requests are forwarded to the provider's Responses endpoint without conversion to Chat Completions, whether this dialect works at all for non-OpenAI models is an open empirical question, and one of the more interesting things a live run will settle.
-
-Open questions the harness is built to answer, all currently unanswered: whether `/messages` genuinely routes to non-Anthropic models such as Grok, Gemini, DeepSeek, Mistral, and Qwen; whether the three upstream bodies for one model are byte-identical, semantically equivalent, or divergent; whether `error_type` holds stable across dialects; whether Chat rejects, ignores, or accepts `output_config`; and how each dialect's tokenizer accounting compares for identical input bytes.
-
 ## Limitations and known unknowns
 
-Findings are date-stamped because this API surface moves; the docs reconciliation is current as of **2026-08-27** and should be re-run before trusting it. The parameter-fate classifier searches the echoed upstream body recursively for a set of candidate wire names per parameter, so a provider that renames a field to something outside that candidate list will be reported as `dropped` when it was really renamed — the candidate lists are a maintenance surface. The effort-to-thinking-budget mapping used when translating a reasoning effort level onto `/messages` is this harness's own convention, not an OpenRouter or Anthropic one, and it is recorded in every `BuildNotes` so it is never mistaken for an API behavior. Determinism results are only as meaningful as the provider's own determinism guarantees, which for most models are weak regardless of seed. Replay cassettes are keyed on exact request bytes, so they are tied to the suite that produced them. And the committed sample cassette is synthetic: it demonstrates the report shape, not OpenRouter's behavior.
+The parameter-fate classifier searches the echoed upstream body recursively for a set of candidate wire names per parameter, so a provider that renames a field to something outside that candidate list will be reported as `dropped` when it was really renamed — the candidate lists are a maintenance surface. The effort-to-thinking-budget mapping used when translating a reasoning effort level onto `/messages` is this harness's own convention, not an OpenRouter or Anthropic one, and it is recorded in every `BuildNotes` so it is never mistaken for an API behavior. Determinism results are only as meaningful as the provider's own determinism guarantees, which for most models are weak regardless of seed. Replay cassettes are keyed on exact request bytes, so they are tied to the suite that produced them. And the committed sample cassette is synthetic: it demonstrates the report shape, not OpenRouter's behavior.
 
 ## Dependencies
 

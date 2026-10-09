@@ -87,6 +87,9 @@ learning_log.txt
 
 replay.go
 
+# Local run analysis for tool-calling; linked from its README but not committed.
+/tool-calling/findings.md
+
 # --- orlab (Go harness) ------------------------------------------------------
 # Run artifacts hold full request/response bodies. Never commit a live run;
 # the committed cassette under orlab/testdata is synthetic and regenerable.

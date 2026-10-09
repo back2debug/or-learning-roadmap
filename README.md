@@ -60,10 +60,6 @@ python model_calls.py call-video google/veo-3.1 "A cat playing with a ball"
 python model_calls.py call-embedding openai/text-embedding-3-small
 ```
 
-Pass the exact `provider/model` ID from the listing — a display name like
-`GPT-4` will not match. Listing is read-only and cheap; the `call-*` subcommands
-bill your account.
-
 `call-speech` takes an optional fourth argument, the voice. Voice names are
 model-specific — `af_bella` on Kokoro, `en-US-Harper:MAI-Voice-2` on MAI-Voice —
 and a name the model doesn't publish is rejected, so when it's omitted the
@@ -147,19 +143,15 @@ python openrouter_sdk_examples.py async
 `compare-models` and `async` each issue several requests; the rest are one call
 apiece. An unknown name prints the list above rather than running anything.
 
-## reasoning-explorer/
+## Learning modules
 
-A separate Go sub-project (stdlib only, no SDKs) that dissects reasoning models
-through the raw OpenRouter HTTP API: the unified `reasoning` request parameter,
-the `reasoning`/`reasoning_details` response fields, token accounting
-(reasoning bills as output), hand-parsed SSE streaming, a cross-provider
-comparison (DeepSeek/Anthropic/OpenAI/Gemini/Qwen), and multi-turn tool calling
-with preserved thinking blocks. Every request and raw response is logged to
-`reasoning-explorer/logs/`. See its own README:
+Separate Go sub-projects, each documented in its own README:
 
-```bash
-cd reasoning-explorer && go run . phase1   # phases 1–6
-```
+- [jev-learning](jev-learning/README.md)
+- [orlab](orlab/README.md)
+- [pareto-lab](pareto-lab/README.md)
+- [reasoning-explorer](reasoning-explorer/README.md)
+- [tool-calling](tool-calling/README.md)
 
 ## Configuration
 

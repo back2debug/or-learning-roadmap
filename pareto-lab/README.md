@@ -45,9 +45,6 @@ Test configuration is hardcoded at the top of `main.go`:
 | `outDir`     | `.`     | where the results files are written        |
 | `scoreSweep` | 0.3–1.0 | the `min_coding_score` values under test   |
 
-A full run makes 11 requests and costs roughly $0.05–0.10 depending on which
-models the router selects.
-
 ## Output files
 
 All three files append across runs, so history accumulates:

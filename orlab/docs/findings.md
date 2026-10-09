@@ -1,4 +1,4 @@
-# API-NOTES — live-docs reconciliation
+# Findings — live-docs reconciliation and live runs
 
 Checked: **2026-08-27** against https://openrouter.ai/docs (llms.txt index,
 errors-and-debugging, router-metadata, chat-completion reference, anthropic-messages

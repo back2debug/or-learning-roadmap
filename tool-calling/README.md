@@ -38,6 +38,9 @@ The file is truncated at the start of each run and its absolute path is
 logged on startup. It is covered by the repo's `*.log` gitignore rule, so it
 won't be committed.
 
+Observations from past runs are kept in [findings.md](findings.md), a local
+notes file that is gitignored as well.
+
 ## Test
 
 Unit tests never touch the network — the client depends on a small `HTTPDoer`
@@ -61,34 +64,6 @@ go test ./...       # or: go test -v ./...
 > **Why `openrouter/auto`?** A request with no `model` field requires a
 > default configured in your dashboard. The router pseudo-model `openrouter/auto`
 > (or its successor `openrouter/auto-beta`) lets the API decide.
-
-## Findings from a sample run (2026-08-04)
-
-- **Routing is per-request.** `openrouter/auto` served turn 1 with
-  `google/gemini-3.6-flash` and turn 2 with `openai/gpt-5.6-sol`. Full message
-  history travels with each request, so it works — but pin the model if you
-  need consistency.
-- **`openrouter/auto-beta` routed to `z-ai/glm-5.2` consistently** across all
-  turns in our run, unlike the less-consistent `auto`.
-- **Token counts vary by model.** Explicit Sonnet 5 runs report ~3× the tokens
-  of routed runs for the same conversation (tokenizer differences and Claude's
-  larger tool-schema serialization, not efficiency).
-- **Wire-format quirks:** Claude emits `toolu_...` IDs and arguments in schema
-  order; Gemini reverses them. Arguments must be parsed as JSON, never matched
-  as strings. `native_finish_reason` preserves the upstream provider's stop
-  reason under the normalized `finish_reason`.
-
-## Project layout
-
-| File | Responsibility |
-|---|---|
-| `main.go` | Entry point; part definitions; the shared conversation loop; inspection, explanation, and comparison output |
-| `client.go` | Hardened OpenRouter client: `HTTPDoer` interface, retries with backoff, per-attempt timeouts, status validation |
-| `models.go` | Typed structs mirroring the OpenRouter wire format (request, response, tool calls, usage, error envelope) |
-| `tools.go` | `add_numbers` / `multiply_numbers` definitions (JSON Schema) and strict argument validation + execution |
-| `const.go` | All model names, header names, timeouts, and limits as typed constants |
-| `logger.go` | `log/slog` setup, API-key redaction, JSON pretty-printing, section separators |
-| `client_test.go` | Unit tests with a mocked HTTP transport (parse, retry-on-500, no-retry-on-4xx, argument validation) |
 
 ## Security practices demonstrated
 
