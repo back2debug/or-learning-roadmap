@@ -144,13 +144,11 @@ func run() error {
 		return err
 	}
 
-	// Reports go to the top-level reports/ (regenerated every run) and a
-	// per-run archival copy.
+	// Reports live alongside the run's records.
 	transcriptPath := filepath.Join(runDir, "transcript.txt")
-	for _, dir := range []string{"reports", filepath.Join(runDir, "reports")} {
-		if err := analyze.WriteReports(dir, data, transcriptPath); err != nil {
-			return err
-		}
+	reportsDir := filepath.Join(runDir, "reports")
+	if err := analyze.WriteReports(reportsDir, data, transcriptPath); err != nil {
+		return err
 	}
 
 	log.Info("run complete",
@@ -159,7 +157,7 @@ func run() error {
 		"partial", data.Partial,
 		"dropped_records", rec.Dropped(),
 		"records", filepath.Join(runDir, "run.jsonl"),
-		"analysis", filepath.Join("reports", "ANALYSIS.md"),
+		"analysis", filepath.Join(reportsDir, "ANALYSIS.md"),
 	)
 	if rec.Dropped() > 0 {
 		log.Warn("some records were dropped by fail-closed redaction", "count", rec.Dropped())

@@ -23,7 +23,8 @@ to a timestamped `jev_decisions_<date>_<time>.log` in this directory.
 | 2 | `choice` | Routing a support ticket to one key from a criteria map, with a JSON object as state |
 | 3 | `score`, `noul`, `choice` | Several questions in one round trip, using the `~typesafe/jev-latest` alias |
 
-## Notes
+## Run analysis
 
-[jev_decisions.md](jev_decisions.md) holds the reference notes: the model, the
-request and response shapes, and what each question type returns.
+[jev_decisions.md](jev_decisions.md) compares the runs so far: how stable the
+answers are, latency, and tokens and cost. The request and response shapes are
+in the header comment of `jev_decisions.go`.

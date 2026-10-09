@@ -1,0 +1,50 @@
+name: tutorials CI
+
+on:
+  push:
+    paths:
+      - "jev-learning/**"
+      - "pareto-lab/**"
+      - "reasoning-explorer/**"
+      - "tool-calling/**"
+      - ".github/workflows/tutorials-ci.yml"
+  pull_request:
+    paths:
+      - "jev-learning/**"
+      - "pareto-lab/**"
+      - "reasoning-explorer/**"
+      - "tool-calling/**"
+      - ".github/workflows/tutorials-ci.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [jev-learning, pareto-lab, reasoning-explorer, tool-calling]
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          check-latest: true
+          cache-dependency-path: ${{ matrix.module }}/go.mod
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race)
+        run: go test -race ./...
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
