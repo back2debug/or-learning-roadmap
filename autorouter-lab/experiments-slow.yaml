@@ -1,0 +1,32 @@
+# Slow experiments, kept out of the main matrix because they wait.
+# Run with: lab -config experiments-slow.yaml -max-spend <usd>
+version: 1
+
+defaults:
+  max_tokens: 64
+  timeout_seconds: 90
+  max_price:
+    prompt: 25
+    completion: 125
+
+experiments:
+  # Sticky sessions are documented to expire after 10 idle minutes. Two turns
+  # establish the session; the second experiment resumes it after 11 minutes.
+  - id: decay-establish
+    description: Establish a session.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: decay
+    repeats: 2
+
+  - id: decay-resume
+    description: Same session after the documented expiry.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: decay
+    wait_before_seconds: 660
+    repeats: 2

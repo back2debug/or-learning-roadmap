@@ -1,0 +1,36 @@
+# Shared prompt library. Both routers draw from the same entries so that
+# head-to-head cells are comparable. Each prompt is chosen to land on a
+# different task classification; expected_task_type is a hypothesis for the
+# analysis to check, not something the harness asserts.
+version: 1
+prompts:
+  - id: math-sum
+    expected_task_type: math
+    text: |
+      What is the sum of the integers from 1 to 100? Show the formula you used.
+
+  - id: debug-nil-map
+    expected_task_type: code:debugging
+    text: |
+      This Go program panics with "assignment to entry in nil map". Find the bug
+      and give the one-line fix.
+
+          var counts map[string]int
+          func add(w string) { counts[w]++ }
+
+  - id: plan-migration
+    expected_task_type: agent:multi_step_planning
+    text: |
+      Plan, as numbered steps with dependencies, how to move a small web app's
+      database from SQLite to PostgreSQL with under five minutes of downtime.
+
+  - id: fact-lookup
+    expected_task_type: qa_knowledge
+    text: |
+      In what year was the Treaty of Westphalia signed, and which war did it end?
+
+  - id: write-essay
+    expected_task_type: research_report
+    text: |
+      Write a 300-word explainer on why bridges have expansion joints, for a
+      general audience.

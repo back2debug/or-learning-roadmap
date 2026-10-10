@@ -1,0 +1,299 @@
+# Follow-up experiments, designed after the first full run (2026-10-09).
+# Run with: lab -config experiments-followup.yaml -max-spend <usd>
+#
+# This file sets no default max_price on purpose: its first job is to find out
+# whether sending the cap changes routing.
+version: 1
+
+defaults:
+  repeats: 3
+  max_tokens: 64
+  timeout_seconds: 90
+
+experiments:
+  # --- Control: does a max_price cap change the routing decision? -------------
+  # The first run showed the stable track filters by price while choosing a
+  # model. Each prompt is routed with no provider block and with the cap the
+  # main matrix sends everywhere. If the pairs match, the cap is not a confound
+  # at this level.
+  - id: nocap-math-sum
+    description: No plugin, no provider block.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+
+  - id: cap-math-sum
+    description: No plugin; the main matrix's default price cap.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    provider:
+      max_price:
+        prompt: 25
+        completion: 125
+
+  - id: nocap-debug-nil-map
+    description: No plugin, no provider block.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+
+  - id: cap-debug-nil-map
+    description: No plugin; the main matrix's default price cap.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    provider:
+      max_price:
+        prompt: 25
+        completion: 125
+
+  - id: nocap-plan-migration
+    description: No plugin, no provider block.
+    router: both
+    transport: chat_completions
+    prompt_id: plan-migration
+
+  - id: cap-plan-migration
+    description: No plugin; the main matrix's default price cap.
+    router: both
+    transport: chat_completions
+    prompt_id: plan-migration
+    provider:
+      max_price:
+        prompt: 25
+        completion: 125
+
+  - id: nocap-fact-lookup
+    description: No plugin, no provider block.
+    router: both
+    transport: chat_completions
+    prompt_id: fact-lookup
+
+  - id: cap-fact-lookup
+    description: No plugin; the main matrix's default price cap.
+    router: both
+    transport: chat_completions
+    prompt_id: fact-lookup
+    provider:
+      max_price:
+        prompt: 25
+        completion: 125
+
+  - id: nocap-write-essay
+    description: No plugin, no provider block.
+    router: both
+    transport: chat_completions
+    prompt_id: write-essay
+
+  - id: cap-write-essay
+    description: No plugin; the main matrix's default price cap.
+    router: both
+    transport: chat_completions
+    prompt_id: write-essay
+    provider:
+      max_price:
+        prompt: 25
+        completion: 125
+
+  # --- Stickiness: does a session carry its model? ----------------------------
+  # Routing is deterministic for a given prompt and config, so repeating a task
+  # cannot show memory. Each session below opens with cost_tier high and then
+  # sends two turns with no setting. Fresh routing for those turns is the
+  # nocap-* cell; the opening turn's fresh choice is the high-* cell. If turns
+  # two and three return the opening model, the session carried it.
+  - id: high-math-sum
+    description: Fresh-routing reference for cost_tier high.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    repeats: 2
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-math-sum-1
+    description: Open the session with cost_tier high.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: carry-auto-math-sum
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-math-sum-2
+    description: Same session, no cost setting.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: carry-auto-math-sum
+    repeats: 2
+
+  - id: carry-beta-math-sum-1
+    description: Open the session with cost_tier high.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: carry-beta-math-sum
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-beta-math-sum-2
+    description: Same session, no cost setting.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: carry-beta-math-sum
+    repeats: 2
+
+  - id: high-debug-nil-map
+    description: Fresh-routing reference for cost_tier high.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    repeats: 2
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-debug-nil-map-1
+    description: Open the session with cost_tier high.
+    router: auto
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-auto-debug-nil-map
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-debug-nil-map-2
+    description: Same session, no cost setting.
+    router: auto
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-auto-debug-nil-map
+    repeats: 2
+
+  - id: carry-beta-debug-nil-map-1
+    description: Open the session with cost_tier high.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-beta-debug-nil-map
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-beta-debug-nil-map-2
+    description: Same session, no cost setting.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-beta-debug-nil-map
+    repeats: 2
+
+  - id: high-plan-migration
+    description: Fresh-routing reference for cost_tier high.
+    router: both
+    transport: chat_completions
+    prompt_id: plan-migration
+    repeats: 2
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-plan-migration-1
+    description: Open the session with cost_tier high.
+    router: auto
+    transport: chat_completions
+    prompt_id: plan-migration
+    stickiness: sticky
+    session_id: carry-auto-plan-migration
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-plan-migration-2
+    description: Same session, no cost setting.
+    router: auto
+    transport: chat_completions
+    prompt_id: plan-migration
+    stickiness: sticky
+    session_id: carry-auto-plan-migration
+    repeats: 2
+
+  - id: carry-beta-plan-migration-1
+    description: Open the session with cost_tier high.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: plan-migration
+    stickiness: sticky
+    session_id: carry-beta-plan-migration
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-beta-plan-migration-2
+    description: Same session, no cost setting.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: plan-migration
+    stickiness: sticky
+    session_id: carry-beta-plan-migration
+    repeats: 2
+
+  - id: high-fact-lookup
+    description: Fresh-routing reference for cost_tier high.
+    router: both
+    transport: chat_completions
+    prompt_id: fact-lookup
+    repeats: 2
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-fact-lookup-1
+    description: Open the session with cost_tier high.
+    router: auto
+    transport: chat_completions
+    prompt_id: fact-lookup
+    stickiness: sticky
+    session_id: carry-auto-fact-lookup
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-auto-fact-lookup-2
+    description: Same session, no cost setting.
+    router: auto
+    transport: chat_completions
+    prompt_id: fact-lookup
+    stickiness: sticky
+    session_id: carry-auto-fact-lookup
+    repeats: 2
+
+  - id: carry-beta-fact-lookup-1
+    description: Open the session with cost_tier high.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: fact-lookup
+    stickiness: sticky
+    session_id: carry-beta-fact-lookup
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: carry-beta-fact-lookup-2
+    description: Same session, no cost setting.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: fact-lookup
+    stickiness: sticky
+    session_id: carry-beta-fact-lookup
+    repeats: 2

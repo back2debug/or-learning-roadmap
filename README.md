@@ -6,6 +6,7 @@ documented in its own README.
 | Project | Language | What it is |
 | --- | --- | --- |
 | [sdk-examples](sdk-examples/README.md) | Python | Annotated SDK examples and a model catalog browser covering six modalities |
+| [autorouter-lab](autorouter-lab/README.md) | Go | Compares the standard and early-access Auto Router tracks across a matrix of plugin and provider settings |
 | [jev-learning](jev-learning/README.md) | Go | Three requests against the TypeSafe: Jev decision model |
 | [orlab](orlab/README.md) | Go | Sends one prompt through all three API dialects (Chat Completions, Responses, Messages) and compares the results |
 | [pareto-lab](pareto-lab/README.md) | Go | Observes which model the Pareto Code router picks, with cost, latency, and token usage |

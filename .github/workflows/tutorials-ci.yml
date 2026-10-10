@@ -3,6 +3,7 @@ name: tutorials CI
 on:
   push:
     paths:
+      - "autorouter-lab/**"
       - "jev-learning/**"
       - "pareto-lab/**"
       - "reasoning-explorer/**"
@@ -10,6 +11,7 @@ on:
       - ".github/workflows/tutorials-ci.yml"
   pull_request:
     paths:
+      - "autorouter-lab/**"
       - "jev-learning/**"
       - "pareto-lab/**"
       - "reasoning-explorer/**"
@@ -22,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jev-learning, pareto-lab, reasoning-explorer, tool-calling]
+        module: [autorouter-lab, jev-learning, pareto-lab, reasoning-explorer, tool-calling]
     defaults:
       run:
         working-directory: ${{ matrix.module }}

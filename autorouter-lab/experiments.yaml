@@ -1,0 +1,413 @@
+# Experiment matrix. Decoded strictly: an unknown or misspelled key is an error.
+#
+# router:     auto | auto-beta | both   (both = head-to-head, identical settings)
+# transport:  chat_completions | messages
+# stickiness: isolate (default) | sticky | implicit
+#
+# The plugin id is never written here; it is derived from the router.
+# Run a subset with: lab -max-spend <usd> -only <id>,<id>
+version: 1
+
+defaults:
+  repeats: 3
+  max_tokens: 64
+  timeout_seconds: 90
+  # Defence in depth for spend, in USD per million tokens. Set just above the
+  # catalog's 99th percentile (2026-10-09), so only the most extreme endpoints
+  # are refused. A cell whose chosen model has no endpoint under this cap
+  # fails, and that failure is the intended outcome.
+  max_price:
+    prompt: 25
+    completion: 125
+
+experiments:
+  # --- Smoke ------------------------------------------------------------------
+  - id: smoke-low
+    description: One cheap request per track with a plugin block.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    repeats: 1
+    plugin:
+      cost_tier: low
+
+  # --- Q1, Q2, Q4: divergence, classification, and the default ---------------
+  # No cost setting, every prompt, both tracks. The reference point for the
+  # default-band question and the main classification sample.
+  - id: baseline-math-sum
+    description: No plugin block at all.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+
+  - id: baseline-debug-nil-map
+    description: No plugin block at all.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+
+  - id: baseline-plan-migration
+    description: No plugin block at all.
+    router: both
+    transport: chat_completions
+    prompt_id: plan-migration
+
+  - id: baseline-fact-lookup
+    description: No plugin block at all.
+    router: both
+    transport: chat_completions
+    prompt_id: fact-lookup
+
+  - id: baseline-write-essay
+    description: No plugin block at all.
+    router: both
+    transport: chat_completions
+    prompt_id: write-essay
+
+  # --- Q4, Q5: tier sweep -----------------------------------------------------
+  # low -> max on one prompt. Compare each against baseline-debug-nil-map to
+  # find which band "no setting" behaves like, and watch the band move: a band
+  # excludes cheaper models as well as dearer ones.
+  - id: tier-low
+    description: cost_tier low.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: low
+
+  - id: tier-medium
+    description: cost_tier medium.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: medium
+
+  - id: tier-high
+    description: cost_tier high.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: high
+
+  - id: tier-xhigh
+    description: cost_tier xhigh.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: xhigh
+
+  - id: tier-max
+    description: cost_tier max.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: max
+
+  # --- Q6: the deprecated dial on its own -------------------------------------
+  # 0-10, higher favours cheaper models; the spec says it defaults to 9.
+  - id: dial-0
+    description: cost_quality_tradeoff 0, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 0
+
+  - id: dial-3
+    description: cost_quality_tradeoff 3, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 3
+
+  - id: dial-5
+    description: cost_quality_tradeoff 5, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 5
+
+  - id: dial-7
+    description: cost_quality_tradeoff 7, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 7
+
+  - id: dial-9
+    description: cost_quality_tradeoff 9, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 9
+
+  - id: dial-10
+    description: cost_quality_tradeoff 10, no cost_tier.
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    plugin:
+      cost_quality_tradeoff: 10
+
+  # --- Q3: precedence ---------------------------------------------------------
+  # The two settings pull in opposite directions. If cost_tier wins, each cell
+  # should match its tier-* cell and not its dial-* cell.
+  - id: precedence-tier-max-dial-10
+    description: cost_tier max (dear) with dial 10 (cheapest).
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    allow_cost_conflict: true
+    plugin:
+      cost_tier: max
+      cost_quality_tradeoff: 10
+
+  - id: precedence-tier-low-dial-0
+    description: cost_tier low (cheap) with dial 0 (dearest).
+    router: both
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    allow_cost_conflict: true
+    plugin:
+      cost_tier: low
+      cost_quality_tradeoff: 0
+
+  # --- Restrictions -----------------------------------------------------------
+  - id: restrict-impossible
+    description: An allow-list nothing can match; a 404 here is the passing result.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    repeats: 1
+    expect_status: 404
+    plugin:
+      allowed_models: ["no-such-vendor-autorouter-lab/*"]
+
+  - id: restrict-google
+    description: Allow-list of one vendor seen in the pool on 2026-10-09.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    plugin:
+      allowed_models: ["google/*"]
+
+  - id: restrict-google-minus-flash
+    description: Exclusions apply after the allow-list, so no flash model may appear.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    plugin:
+      allowed_models: ["google/*"]
+      excluded_models: ["*flash*"]
+
+  - id: max-price-floor
+    description: A price cap no max-band endpoint should meet; failing is correct.
+    router: both
+    transport: chat_completions
+    prompt_id: math-sum
+    repeats: 1
+    expect_status: 404
+    plugin:
+      cost_tier: max
+    provider:
+      max_price:
+        prompt: 0.01
+        completion: 0.01
+
+  # --- Q8: stickiness ---------------------------------------------------------
+  # Compare each against the isolate baselines above: the same prompt routed
+  # fresh every time shows how much the model varies without a session.
+  - id: sticky-same-task-auto
+    description: One session, one task, four turns.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    repeats: 4
+
+  - id: sticky-same-task-beta
+    description: One session, one task, four turns.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    repeats: 4
+
+  - id: sticky-task-switch-auto
+    description: One session, the task changes and changes back.
+    router: auto
+    transport: chat_completions
+    stickiness: sticky
+    repeats: 1
+    prompt_sequence: [math-sum, math-sum, write-essay, debug-nil-map, math-sum]
+
+  - id: sticky-task-switch-beta
+    description: One session, the task changes and changes back.
+    router: auto-beta
+    transport: chat_completions
+    stickiness: sticky
+    repeats: 1
+    prompt_sequence: [math-sum, math-sum, write-essay, debug-nil-map, math-sum]
+
+  # Two experiments sharing a session_id form one session, run in file order.
+  - id: sticky-router-switch-1
+    description: Establish a session on the stable track.
+    router: auto
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: router-switch
+    repeats: 2
+
+  - id: sticky-router-switch-2
+    description: Same session id on the beta track; is the router part of the identity?
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: math-sum
+    stickiness: sticky
+    session_id: router-switch
+    repeats: 2
+
+  # The run of 2026-10-09 showed routing is deterministic for a given prompt
+  # and config, so repeating one task in a session cannot tell "remembered"
+  # from "chosen again". These pairs can: the first turn's config makes the
+  # router choose a model the second turn's config would not choose fresh.
+  # If turn two returns turn one's model, the session carried it.
+  - id: sticky-carry-auto-1
+    description: Establish the session on a medium-band model.
+    router: auto
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-auto
+    repeats: 1
+    plugin:
+      cost_tier: medium
+
+  - id: sticky-carry-auto-2
+    description: Same session, no cost setting; fresh routing would pick the baseline model.
+    router: auto
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-auto
+    repeats: 2
+
+  - id: sticky-carry-beta-1
+    description: Establish the session on a high-band model.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-beta
+    repeats: 1
+    plugin:
+      cost_tier: high
+
+  - id: sticky-carry-beta-2
+    description: Same session, no cost setting; fresh routing would pick the baseline model.
+    router: auto-beta
+    transport: chat_completions
+    prompt_id: debug-nil-map
+    stickiness: sticky
+    session_id: carry-beta
+    repeats: 2
+
+  - id: implicit-repeat
+    description: No session_id; the server fingerprints the first message.
+    router: auto
+    transport: chat_completions
+    prompt_id: fact-lookup
+    stickiness: implicit
+    repeats: 4
+
+  # --- Q7: the Messages surface ------------------------------------------------
+  # Each cell mirrors a chat_completions cell above, so the two surfaces can be
+  # compared on identical settings. messages-restrict-impossible is the
+  # decisive one: a 404 means the plugin block was honoured, a 200 means it was
+  # dropped on the way through.
+  - id: messages-smoke-low
+    description: One cheap request per track with a plugin block.
+    router: both
+    transport: messages
+    prompt_id: math-sum
+    repeats: 1
+    plugin:
+      cost_tier: low
+
+  - id: messages-restrict-impossible
+    description: An allow-list nothing can match; a 404 here means plugins work on this surface.
+    router: both
+    transport: messages
+    prompt_id: math-sum
+    repeats: 1
+    expect_status: 404
+    plugin:
+      allowed_models: ["no-such-vendor-autorouter-lab/*"]
+
+  - id: messages-baseline-math-sum
+    description: No plugin block; mirrors baseline-math-sum.
+    router: both
+    transport: messages
+    prompt_id: math-sum
+
+  - id: messages-baseline-debug-nil-map
+    description: No plugin block; mirrors baseline-debug-nil-map.
+    router: both
+    transport: messages
+    prompt_id: debug-nil-map
+
+  - id: messages-tier-low
+    description: Mirrors tier-low.
+    router: both
+    transport: messages
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: low
+
+  - id: messages-tier-max
+    description: Mirrors tier-max.
+    router: both
+    transport: messages
+    prompt_id: debug-nil-map
+    plugin:
+      cost_tier: max
+
+  - id: messages-restrict-google
+    description: Mirrors restrict-google.
+    router: both
+    transport: messages
+    prompt_id: math-sum
+    plugin:
+      allowed_models: ["google/*"]
+
+  - id: messages-max-price-floor
+    description: Mirrors max-price-floor; does the provider block survive on this surface?
+    router: both
+    transport: messages
+    prompt_id: math-sum
+    repeats: 1
+    expect_status: 404
+    plugin:
+      cost_tier: max
+    provider:
+      max_price:
+        prompt: 0.01
+        completion: 0.01
+
+  - id: messages-sticky-same-task-auto
+    description: Mirrors sticky-same-task-auto; does session_id work on this surface?
+    router: auto
+    transport: messages
+    prompt_id: math-sum
+    stickiness: sticky
+    repeats: 4

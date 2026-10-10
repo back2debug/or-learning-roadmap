@@ -2,7 +2,6 @@
 # Never commit API keys. OPENROUTER_API_KEY belongs in the environment or .env.
 .env
 .env.*
-!.env.example
 *.pem
 *.key
 secrets.json
@@ -100,6 +99,7 @@ orlab/runs/
 # suite, golden files, and fixtures are JSON source, so re-include them.
 !orlab/internal/prompts/suite.json
 !orlab/**/testdata/**
+!autorouter-lab/**/testdata/**
 
 # --- Go build outputs --------------------------------------------------------
 # Unstripped binaries embed local build paths. Rebuild with `go build` instead.
@@ -109,5 +109,8 @@ orlab/runs/
 /orlab/orlab
 /jev-learning/jev_decisions
 /jev-learning/jev-learning
+/autorouter-lab/lab
+/autorouter-lab/backfill
+/autorouter-lab/analyze
 # Anything else: build into bin/ (go build -o bin/) so it is ignored by default.
 bin/
