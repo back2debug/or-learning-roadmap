@@ -1,6 +1,6 @@
 module github.com/back2debug/or-learning-roadmap/autorouter-lab
 
-go 1.26.0
+go 1.26.9
 
 require (
 	github.com/OpenRouterTeam/go-sdk v0.9.40
